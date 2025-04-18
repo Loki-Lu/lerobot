@@ -305,7 +305,7 @@ if __name__ == "__main__":
     parser.add_argument("--camera_index_third", type=int, default=4) # Example index
     parser.add_argument("--camera_index_wrist", type=int, default=6) # Example index
     # --- End updated camera indices ---
-    parser.add_argument("--instruction", type=str, default="Pick up the fruits and place them on the plate.", help="Task instruction for the policy.")
+    parser.add_argument("--instruction", type=str, default="Grasp red, green, yellow ducks and put them in the box. ")
     args = parser.parse_args()
 
     ACTIONS_TO_EXECUTE = args.actions_to_execute # Number of inference calls

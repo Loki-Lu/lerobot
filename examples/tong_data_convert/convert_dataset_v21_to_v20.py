@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+##python3 examples/tong_data_convert/convert_dataset_v21_to_v20.py --repo-id Loki0929/so100_lan --root /home/tong/.cache/huggingface/lerobot/Loki0929/so100_lan --branch v2.0
+## this code will update a new branch, !!!!! don't push to main !!!
+
 import argparse
 
 from huggingface_hub import HfApi
@@ -26,30 +29,48 @@ CODEBASE_VERSION = V20
 
 def convert_dataset(
     repo_id: str,
+    new_repo_id: str,
     root: str,
     branch: str | None = None,
 ):
+    # Load the original dataset
     dataset = LeRobotDataset(repo_id, revision=V21, root=root, force_cache_sync=False)
 
+    # Remove old stats file if it exists
     if (dataset.root / STATS_PATH).is_file():
         (dataset.root / STATS_PATH).unlink()
 
+    # Write new stats
     write_stats(dataset.meta.stats, dataset.root)
 
+    # Update codebase version in meta info
     dataset.meta.info["codebase_version"] = CODEBASE_VERSION
     write_info(dataset.meta.info, dataset.root)
 
-    # delete episodes_stats.json file
-    if (dataset.root / EPISODES_STATS_PATH).is_file:
+    # Delete episodes_stats.json file locally
+    if (dataset.root / EPISODES_STATS_PATH).is_file():
         (dataset.root / EPISODES_STATS_PATH).unlink()
 
-    dataset.push_to_hub(branch=branch, tag_version=False, allow_patterns="meta/")
-
+    # Initialize HfApi
     hub_api = HfApi()
-    if hub_api.file_exists(repo_id=dataset.repo_id, filename=EPISODES_STATS_PATH, revision=branch, repo_type="dataset"):
-        hub_api.delete_file(path_in_repo=EPISODES_STATS_PATH, repo_id=dataset.repo_id, revision=branch, repo_type="dataset")
 
-    hub_api.create_tag(repo_id, tag=CODEBASE_VERSION, revision=branch, repo_type="dataset")
+    # Create a new dataset repository on Hugging Face Hub
+    hub_api.create_repo(repo_id=new_repo_id, repo_type="dataset", exist_ok=True)
+
+    # Push the dataset to the new repo_id
+    dataset.push_to_hub(repo_id=new_repo_id, branch=branch, tag_version=False, allow_patterns="meta/")
+
+    # Delete episodes_stats.json from the new repo if it exists
+    if hub_api.file_exists(repo_id=new_repo_id, filename=EPISODES_STATS_PATH, revision=branch, repo_type="dataset"):
+        hub_api.delete_file(
+            path_in_repo=EPISODES_STATS_PATH,
+            repo_id=new_repo_id,
+            revision=branch,
+            repo_type="dataset"
+        )
+
+    # Create a tag for the new repo
+    hub_api.create_tag(repo_id=new_repo_id, tag=CODEBASE_VERSION, revision=branch, repo_type="dataset")
 
 
 if __name__ == "__main__":
@@ -58,13 +79,19 @@ if __name__ == "__main__":
         "--repo-id",
         type=str,
         required=True,
-        help="Repository identifier on Hugging Face: a community or a user name `/` the name of the dataset "
-        "(e.g. `lerobot/pusht`, `cadene/aloha_sim_insertion_human`).",
+        help="Original repository identifier on Hugging Face (e.g., `lerobot/pusht`).",
+    )
+    parser.add_argument(
+        "--new-repo-id",
+        type=str,
+        required=True,
+        help="New repository identifier on Hugging Face (e.g., `your_username/new_dataset`).",
     )
     parser.add_argument(
         "--root",
         type=str,
         required=True,
+        help="Local directory to store the dataset.",
     )
     parser.add_argument(
         "--branch",

@@ -23,9 +23,13 @@ logging.getLogger("lerobot").setLevel(logging.INFO)
 logging.getLogger("huggingface_hub").setLevel(logging.INFO)
 
 # --- Configuration ---
-repo_id = "Loki0929/so100_duck_v20"
+repo_id = "Loki0929/so100_lan_v20"
 # Reflecting that images are now included
 output_dir_structured = f"./{repo_id.replace('/', '_')}_full_parquet_with_images"
+
+
+
+
 WRITER_BATCH_SIZE = 500 # Reduce batch size slightly, images are larger
 CHUNK_SIZE = 500 # Episodes per output chunk directory
 

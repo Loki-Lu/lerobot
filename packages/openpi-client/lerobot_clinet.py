@@ -184,7 +184,7 @@ class OpenPIClientAdapter:
         self,
         host="localhost",
         port=8000, # Default OpenPI port
-        language_instruction="Grasp red, green, yellow ducks and put them in the box.",
+        language_instruction="Grasp yellow duck and put it into box.",
         resize_size=224, # Typical resize size for OpenPI models
     ):
         self.language_instruction = language_instruction
@@ -243,6 +243,7 @@ class OpenPIClientAdapter:
             "observation/state": state,
             "prompt": self.language_instruction,
         }
+        print(f"Sending language instruction to server: '{self.language_instruction}'")
 
         # 3. Call the policy server
         start_time = time.time()
@@ -298,14 +299,14 @@ if __name__ == "__main__":
     # Default host/port for OpenPI server
     parser.add_argument("--host", type=str, default="localhost", help="Policy server host IP.")
     parser.add_argument("--port", type=int, default=6006, help="Policy server port.") # Default port 6006 for OpenPI server
-    parser.add_argument("--action_horizon", type=int, default=8, help="Number of actions to execute from the returned chunk.") # Adjust default based on policy
+    parser.add_argument("--action_horizon", type=int, default=30, help="Number of actions to execute from the returned chunk.") # Adjust default based on policy
     parser.add_argument("--actions_to_execute", type=int, default=350, help="Total number of policy inference calls.")
     # --- Updated default camera indices ---
-    parser.add_argument("--camera_index_top", type=int, default=12) # Example index
-    parser.add_argument("--camera_index_third", type=int, default=4) # Example index
+    parser.add_argument("--camera_index_top", type=int, default=4) # Example index
+    parser.add_argument("--camera_index_third", type=int, default=14) # Example index
     parser.add_argument("--camera_index_wrist", type=int, default=6) # Example index
     # --- End updated camera indices ---
-    parser.add_argument("--instruction", type=str, default="Grasp red, green, yellow ducks and put them in the box. ")
+    parser.add_argument("--instruction", type=str, default="Grasp green duck and place it in the box.")
     args = parser.parse_args()
 
     ACTIONS_TO_EXECUTE = args.actions_to_execute # Number of inference calls

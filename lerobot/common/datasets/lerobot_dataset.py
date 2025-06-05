@@ -892,7 +892,6 @@ class LeRobotDataset(torch.utils.data.Dataset):
             self.fps,
             self.tolerance_s,
         )
-
         video_files = list(self.root.rglob("*.mp4"))
         assert len(video_files) == self.num_episodes * len(self.meta.video_keys)
 

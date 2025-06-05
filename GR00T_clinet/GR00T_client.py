@@ -1,4 +1,5 @@
 # SO100 Real Robot
+####python3 GR00T_clinet/GR00T_client.py --use_policy
 import time
 from contextlib import contextmanager
 
@@ -113,7 +114,7 @@ class SO100Robot:
         self.motor_bus.write("P_Coefficient", 10)
         # Set I_Coefficient and D_Coefficient to default value 0 and 32
         self.motor_bus.write("I_Coefficient", 0)
-        self.motor_bus.write("D_Coefficient", 32)
+        self.motor_bus.write("D_Coefficient", 0)
         # Close the write lock so that Maximum_Acceleration gets written to EPROM address,
         # which is mandatory for Maximum_Acceleration to take effect after rebooting.
         self.motor_bus.write("Lock", 0)
@@ -128,16 +129,16 @@ class SO100Robot:
         # print all keys of the observation
         print("observation keys:", self.robot.capture_observation().keys())
 
-        current_state[0] = 90
-        current_state[2] = 90
-        current_state[3] = 90
-        self.robot.send_action(current_state)
+        # current_state[0] = 90
+        # current_state[2] = 90
+        # current_state[3] = 90
+        # self.robot.send_action(current_state)
         time.sleep(2)
 
-        current_state[4] = -70
-        current_state[5] = 30
-        current_state[1] = 90
-        self.robot.send_action(current_state)
+        # current_state[4] = -70
+        # current_state[5] = 30
+        # current_state[1] = 90
+        # self.robot.send_action(current_state)
         time.sleep(2)
 
         print("----------------> SO100 Robot moved to initial pose")
@@ -145,8 +146,8 @@ class SO100Robot:
     def go_home(self):
         # [ 88.0664, 156.7090, 135.6152,  83.7598, -89.1211,  16.5107]
         print("----------------> SO100 Robot moved to home pose")
-        home_state = torch.tensor([88.0664, 156.7090, 135.6152, 83.7598, -89.1211, 16.5107])
-        self.set_target_state(home_state)
+        # home_state = torch.tensor([88.0664, 156.7090, 135.6152, 83.7598, -89.1211, 16.5107])
+        # self.set_target_state(home_state)
         time.sleep(2)
 
     def get_observation(self):
@@ -195,7 +196,7 @@ class Gr00tRobotInferenceClient:  # 修改 Gr00tRobotInferenceClient 类
         self,
         host="localhost",
         port=6006,
-        language_instruction="Grasp red, green, yellow ducks and put them in the box.",
+        language_instruction="Grasp red duck and place it in the box.",
     ):
         self.language_instruction = language_instruction
         # 480, 640
@@ -258,9 +259,9 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=6006)
     parser.add_argument("--action_horizon", type=int, default=12)
     parser.add_argument("--actions_to_execute", type=int, default=350)
-    parser.add_argument("--camera_index_top", type=int, default=11)
-    parser.add_argument("--camera_index_third", type=int, default=4)
-    parser.add_argument("--camera_index_wrist", type=int, default=7)
+    parser.add_argument("--camera_index_top", type=int, default=4)
+    parser.add_argument("--camera_index_third", type=int, default=14)
+    parser.add_argument("--camera_index_wrist", type=int, default=6)
     args = parser.parse_args()
 
     ACTIONS_TO_EXECUTE = args.actions_to_execute
@@ -274,7 +275,7 @@ if __name__ == "__main__":
         client = Gr00tRobotInferenceClient(
             host=args.host,
             port=args.port,
-            language_instruction="Pick up the fruits and place them on the plate.",
+            language_instruction="Grasp red duck and place it in the box.",
         )
 
         robot = SO100Robot(calibrate=False, enable_camera=True, camera_indices=(args.camera_index_top, args.camera_index_third, args.camera_index_wrist))  # 修改：传入摄像头索引
